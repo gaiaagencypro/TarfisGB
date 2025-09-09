@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparatif Tarifaire Détaillé - Outil de Prospection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .stats {
+            padding: 20px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 150px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-card .label {
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 20px 20px;
+            background: #f8f9fa;
+        }
+        
+        .view-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .view-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .table-container {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: #667eea;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.9em;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+            vertical-align: top;
+        }
+        
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+            transform: translateX(5px);
+        }
+        
+        .brand-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        
+        .brand-ta {
+            background: #28a745;
+            color: white;
+        }
+        
+        .brand-hp {
+            background: #0066cc;
+            color: white;
+        }
+        
+        .category-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        
+        .cat-a4 {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .cat-a3 {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .cat-color {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .cat-nb {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .price {
+            font-weight: 600;
+            color: #28a745;
+        }
+        
+        .discount {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #28a745;
+            color: white;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85em;
+        }
+        
+        .spec-list {
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        
+        .spec-item {
+            display: flex;
+            margin: 2px 0;
+        }
+        
+        .spec-label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 80px;
+        }
+        
+        .spec-value {
+            color: #212529;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        
+        .feature-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 12px;
+            font-size: 0.75em;
+            color: #495057;
+        }
+        
+        .feature-tag.highlight {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .product-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .product-card h3 {
+            color: #212529;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+        
+        .product-card .model {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+        
+        .product-card .specs {
+            border-top: 1px solid #e9ecef;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        
+        .product-card .pricing {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .search-highlight {
+            background: #fff59d;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            table {
+                font-size: 0.75em;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.2em;
+        }
+        
+        .btn-export {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-export:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .detail-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-btn:hover {
+            background: #5a67d8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Comparatif Tarifaire Multi-Marques Détaillé</h1>
+            <p>Outil de prospection commerciale avec spécifications techniques - Juillet/Août 2025</p>
+        </div>
+        
+        <div class="filters">
+            <div class="filter-group">
+                <label for="brandFilter">Marque</label>
+                <select id="brandFilter">
+                    <option value="">Toutes les marques</option>
+                    <option value="TA">TA (Triumph-Adler)</option>
+                    <option value="HP">HP</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="categoryFilter">Catégorie</label>
+                <select id="categoryFilter">
+                    <option value="">Toutes les catégories</option>
+                    <option value="A4">Format A4</option>
+                    <option value="A3">Format A3</option>
+                    <option value="NB">Noir & Blanc</option>
+                    <option value="COLOR">Couleur</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="speedFilter">Vitesse (ppm)</label>
+                <select id="speedFilter">
+                    <option value="">Toutes vitesses</option>
+                    <option value="20-30">20-30 ppm</option>
+                    <option value="31-40">31-40 ppm</option>
+                    <option value="41-50">41-50 ppm</option>
+                    <option value="51+">Plus de 50 ppm</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="searchFilter">Recherche</label>
+                <input type="text" id="searchFilter" placeholder="Référence, modèle, fonction...">
+            </div>
+            
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn-export" onclick="exportToCSV()">📥 Exporter CSV</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="value" id="totalProducts">0</div>
+                <div class="label">Produits affichés</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="avgDiscount">0%</div>
+                <div class="label">Remise moyenne</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="avgSpeed">0</div>
+                <div class="label">Vitesse moyenne (ppm)</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="priceRange">-</div>
+                <div class="label">Fourchette de prix</div>
+            </div>
+        </div>
+        
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="switchView('table')">📋 Vue Tableau</button>
+            <button class="view-btn" onclick="switchView('cards')">🎴 Vue Cartes</button>
+        </div>
+        
+        <div class="table-container" id="tableView">
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Marque</th>
+                        <th>Référence</th>
+                        <th>Modèle</th>
+                        <th>Spécifications</th>
+                        <th>Fonctionnalités</th>
+                        <th>Connectivité</th>
+                        <th>Prix Public</th>
+                        <th>Prix Revendeur</th>
+                        <th>Remise</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Les données seront insérées ici -->
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display: none;">
+                Aucun produit ne correspond à vos critères de recherche.
+            </div>
+        </div>
+        
+        <div class="cards-container" id="cardsView" style="display: none;">
+            <!-- Les cartes seront insérées ici -->
+        </div>
+    </div>
+    
+    <script>
+        // Base de données enrichie des produits avec spécifications détaillées
+        const products = [
+            // TA - Imprimantes A4 N&B
+            {
+                brand: 'TA', 
+                ref: 'TA P-3527wMFP', 
+                model: 'MFP n&b 35 ppm', 
+                format: 'A4', 
+                type: 'NB', 
+                speed: 35,
+                publicPrice: 1351, 
+                resellerPrice: 602, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '512 MB',
+                paperCapacity: '300 feuilles (std) / 800 feuilles (max)',
+                monthlyVolume: '50 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 2.0', 'Ethernet', 'WiFi'],
+                features: ['Recto-verso auto', 'ADF 50 feuilles', 'Écran tactile 4.3"', 'PCL6', 'PostScript 3'],
+                processor: 'ARM Cortex-A9 800 MHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA P-4027iwMFP', 
+                model: 'MFP n&b 40 ppm', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 40,
+                publicPrice: 1635, 
+                resellerPrice: 727, 
+                discount: 56,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '500 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '80 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 2.0', 'Ethernet', 'WiFi', 'WiFi Direct'],
+                features: ['Recto-verso auto', 'ADF Dual Scan 50 feuilles', 'Écran tactile 7"', 'PCL6', 'PostScript 3', 'PDF Direct Print'],
+                processor: 'ARM Cortex-A9 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-P4531 MFP', 
+                model: 'MFP n/b 45 ppm 3-en-1', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 45,
+                publicPrice: 3081, 
+                resellerPrice: 1373, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '500 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'ADF 75 feuilles', 'Écran tactile 7"', 'HDD 320 GB', 'Sécurité avancée'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-P4536 MFP', 
+                model: 'MFP n/b 45 ppm 4-en-1', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 45,
+                publicPrice: 3338, 
+                resellerPrice: 1487, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '500 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'ADF 75 feuilles', 'Écran tactile 7"', 'HDD 320 GB', 'Sécurité avancée', 'Super G3 Fax'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-P5539iMFP', 
+                model: 'MFP n&b 55 ppm', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 55,
+                publicPrice: 4125, 
+                resellerPrice: 1838, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '500 feuilles (std) / 3100 feuilles (max)',
+                monthlyVolume: '200 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF Dual Scan 100 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'OCR intégré', 'Finition professionnelle'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            
+            // TA - Imprimantes A4 Couleur
+            {
+                brand: 'TA', 
+                ref: 'TA PC2157w', 
+                model: 'MFP couleur 21 ppm', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 21,
+                publicPrice: 841, 
+                resellerPrice: 375, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '512 MB',
+                paperCapacity: '250 feuilles (std) / 850 feuilles (max)',
+                monthlyVolume: '30 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 2.0', 'Ethernet', 'WiFi'],
+                features: ['Recto-verso manuel', 'ADF 35 feuilles', 'Écran LCD 2 lignes', 'Impression mobile'],
+                processor: 'ARM 800 MHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA PC2656wMFP', 
+                model: 'MFP couleur 26 ppm', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 26,
+                publicPrice: 1259, 
+                resellerPrice: 561, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '250 feuilles (std) / 850 feuilles (max)',
+                monthlyVolume: '40 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 2.0', 'Ethernet', 'WiFi', 'WiFi Direct'],
+                features: ['Recto-verso auto', 'ADF 50 feuilles', 'Écran tactile 4.3"', 'Impression mobile', 'AirPrint'],
+                processor: 'ARM Cortex-A9 1 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA PC3562i', 
+                model: 'MFP couleur 35 ppm', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 35,
+                publicPrice: 4542, 
+                resellerPrice: 2025, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '500 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '80 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'ADF Dual Scan 75 feuilles', 'Écran tactile 7"', 'HDD 320 GB', 'Pantone certifié'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA PC3566iMFP', 
+                model: 'MFP couleur 35 ppm avancé', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 35,
+                publicPrice: 5122, 
+                resellerPrice: 2283, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '500 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '80 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF Dual Scan 100 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'Pantone certifié', 'Finition agrafage'],
+                processor: 'Quad Core 1.4 GHz'
+            },
+            
+            // TA - Imprimantes A3 N&B
+            {
+                brand: 'TA', 
+                ref: 'TA P-2540iMFP', 
+                model: 'MFP A3 n&b 25 ppm', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 25,
+                publicPrice: 2397, 
+                resellerPrice: 1068, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '600 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '50 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit'],
+                features: ['Recto-verso auto', 'RADF 50 feuilles', 'Écran tactile 7"', 'Format SRA3'],
+                processor: 'ARM Cortex-A9 1 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-3263i', 
+                model: 'MFP A3 n&b 32 ppm', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 32,
+                publicPrice: 3891, 
+                resellerPrice: 1734, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '1100 feuilles (std) / 4100 feuilles (max)',
+                monthlyVolume: '100 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'RADF 100 feuilles', 'Écran tactile 9"', 'HDD 320 GB', 'Format SRA3'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-4063i', 
+                model: 'MFP A3 n&b 40 ppm', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 40,
+                publicPrice: 4583, 
+                resellerPrice: 2042, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '1100 feuilles (std) / 7100 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'RADF Dual Scan 140 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'Format SRA3', 'Finition pro'],
+                processor: 'Quad Core 1.4 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA-5059i', 
+                model: 'MFP A3 n&b 50 ppm', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 50,
+                publicPrice: 5729, 
+                resellerPrice: 2553, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '1100 feuilles (std) / 7100 feuilles (max)',
+                monthlyVolume: '200 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'RADF Dual Scan 140 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'Format SRA3', 'Finition booklet'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            
+            // TA - Imprimantes A3 Couleur
+            {
+                brand: 'TA', 
+                ref: 'TA P-C2480iMFP', 
+                model: 'MFP A3 couleur 24 ppm', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 24,
+                publicPrice: 3142, 
+                resellerPrice: 1400, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '600 feuilles (std) / 2100 feuilles (max)',
+                monthlyVolume: '50 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit'],
+                features: ['Recto-verso auto', 'RADF 50 feuilles', 'Écran tactile 7"', 'Format SRA3', 'Calibration couleur'],
+                processor: 'ARM Cortex-A9 1.2 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA 2509ci', 
+                model: 'MFP A3 couleur 25 ppm', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 25,
+                publicPrice: 5583, 
+                resellerPrice: 2488, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '1100 feuilles (std) / 7100 feuilles (max)',
+                monthlyVolume: '100 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'RADF Dual Scan 100 feuilles', 'Écran tactile 9"', 'HDD 320 GB', 'Pantone certifié', 'Format SRA3'],
+                processor: 'Dual Core 1.4 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA 3509ci', 
+                model: 'MFP A3 couleur 35 ppm', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 35,
+                publicPrice: 8437, 
+                resellerPrice: 3760, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '1100 feuilles (std) / 7100 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'RADF Dual Scan 140 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'Pantone certifié', 'Finition pro'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            {
+                brand: 'TA', 
+                ref: 'TA 4009ci', 
+                model: 'MFP A3 couleur 40 ppm', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 40,
+                publicPrice: 10291, 
+                resellerPrice: 4587, 
+                discount: 55,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB + 4 GB',
+                paperCapacity: '1100 feuilles (std) / 7100 feuilles (max)',
+                monthlyVolume: '200 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'RADF Dual Scan 140 feuilles', 'Écran tactile 10.1"', 'SSD 256 GB', 'Fiery Controller', 'Finition booklet'],
+                processor: 'Quad Core 1.6 GHz + Fiery'
+            },
+            
+            // HP - Imprimantes A4 N&B
+            {
+                brand: 'HP', 
+                ref: '3PZ35A', 
+                model: 'HP LaserJet Managed E40040dn', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 40,
+                publicPrice: 839, 
+                resellerPrice: 247, 
+                discount: 71,
+                resolution: '1200 x 1200 dpi',
+                memory: '256 MB',
+                paperCapacity: '350 feuilles (std) / 900 feuilles (max)',
+                monthlyVolume: '80 000 pages/mois',
+                functions: ['Impression'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit'],
+                features: ['Recto-verso auto', 'Écran LCD 2 lignes', 'HP ePrint', 'JetIntelligence'],
+                processor: 'ARM 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '7PS30A', 
+                model: 'HP LaserJet Managed MFP E42540f', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 40,
+                publicPrice: 1569, 
+                resellerPrice: 502, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '512 MB',
+                paperCapacity: '350 feuilles (std) / 900 feuilles (max)',
+                monthlyVolume: '80 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'ADF 50 feuilles', 'Écran tactile 4.3"', 'HP ePrint', 'JetIntelligence', 'Sécurité renforcée'],
+                processor: 'ARM 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '7PS37A', 
+                model: 'HP LaserJet Managed MFP E52645dn', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 45,
+                publicPrice: 3299, 
+                resellerPrice: 989, 
+                discount: 70,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '650 feuilles (std) / 2300 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF 100 feuilles', 'Écran tactile 8"', 'OCR', 'HP Wolf Security', 'HDD 500 GB'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '2Z451A', 
+                model: 'HP LaserJet Enterprise M507x', 
+                format: 'A4', 
+                type: 'NB',
+                speed: 43,
+                publicPrice: 1849, 
+                resellerPrice: 629, 
+                discount: 66,
+                resolution: '1200 x 1200 dpi',
+                memory: '512 MB',
+                paperCapacity: '650 feuilles (std) / 2300 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit', 'WiFi'],
+                features: ['Recto-verso auto', 'Écran tactile 4.3"', 'HP ePrint', 'AirPrint', 'Pull printing'],
+                processor: 'ARM 1.2 GHz'
+            },
+            
+            // HP - Imprimantes A4 Couleur
+            {
+                brand: 'HP', 
+                ref: '6DP54A', 
+                model: 'HP Color LaserJet Managed MFP E47528f', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 28,
+                publicPrice: 1599, 
+                resellerPrice: 544, 
+                discount: 66,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '300 feuilles (std) / 850 feuilles (max)',
+                monthlyVolume: '50 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 2.0', 'Ethernet Gigabit', 'WiFi'],
+                features: ['Recto-verso auto', 'ADF 50 feuilles', 'Écran tactile 4.3"', 'HP ePrint', 'Couleur professionnelle'],
+                processor: 'ARM 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: 'W1A77A', 
+                model: 'HP Color LaserJet Pro MFP M479dw', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 28,
+                publicPrice: 899, 
+                resellerPrice: 324, 
+                discount: 64,
+                resolution: '600 x 600 dpi',
+                memory: '512 MB',
+                paperCapacity: '300 feuilles (std) / 850 feuilles (max)',
+                monthlyVolume: '50 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 2.0', 'Ethernet', 'WiFi', 'WiFi Direct'],
+                features: ['Recto-verso auto', 'ADF 50 feuilles', 'Écran tactile 4.3"', 'HP Smart App', 'Impression mobile'],
+                processor: 'ARM 1 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '3WT86A', 
+                model: 'HP Color LaserJet Enterprise M653dn', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 56,
+                publicPrice: 2199, 
+                resellerPrice: 748, 
+                discount: 66,
+                resolution: '1200 x 1200 dpi',
+                memory: '1 GB',
+                paperCapacity: '650 feuilles (std) / 2300 feuilles (max)',
+                monthlyVolume: '120 000 pages/mois',
+                functions: ['Impression'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'Écran tactile 4.3"', 'HP JetIntelligence', 'Pantone calibré', 'Sécurité avancée'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '7PS94A', 
+                model: 'HP Color LaserJet Managed E57540dn', 
+                format: 'A4', 
+                type: 'COLOR',
+                speed: 40,
+                publicPrice: 3899, 
+                resellerPrice: 1247, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '650 feuilles (std) / 2300 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF Flow 100 feuilles', 'Écran tactile 8"', 'OCR', 'HP Wolf Pro Security', 'HDD 500 GB'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            
+            // HP - Imprimantes A3 N&B
+            {
+                brand: 'HP', 
+                ref: '2KJ46A', 
+                model: 'HP LaserJet Managed MFP E73120dn', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 20,
+                publicPrice: 4799, 
+                resellerPrice: 1536, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '2 GB',
+                paperCapacity: '520 feuilles (std) / 3140 feuilles (max)',
+                monthlyVolume: '100 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'Scanner à plat A3', 'Écran tactile 8"', 'HP Workpath', 'Sécurité renforcée'],
+                processor: 'Dual Core 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '2KJ47A', 
+                model: 'HP LaserJet Managed MFP E73130dn', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 30,
+                publicPrice: 5999, 
+                resellerPrice: 1920, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '520 feuilles (std) / 3140 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF 100 feuilles', 'Écran tactile 10.1"', 'HP Workpath', 'OCR', 'HDD 320 GB'],
+                processor: 'Quad Core 1.2 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '5QK01A', 
+                model: 'HP LaserJet Managed MFP E82640dn', 
+                format: 'A3', 
+                type: 'NB',
+                speed: 40,
+                publicPrice: 7899, 
+                resellerPrice: 2528, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '6 GB',
+                paperCapacity: '1140 feuilles (std) / 6140 feuilles (max)',
+                monthlyVolume: '300 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF 200 feuilles', 'Écran tactile 10.1"', 'HP Workpath', 'OCR avancé', 'SSD 500 GB', 'Finition agrafage'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            
+            // HP - Imprimantes A3 Couleur
+            {
+                brand: 'HP', 
+                ref: '7KW74A', 
+                model: 'HP Color LaserJet Enterprise MFP X78228dn', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 28,
+                publicPrice: 8999, 
+                resellerPrice: 2880, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '6 GB',
+                paperCapacity: '1140 feuilles (std) / 6140 feuilles (max)',
+                monthlyVolume: '150 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF Flow 150 feuilles', 'Écran tactile 10.1"', 'Pantone calibré', 'HP Wolf Enterprise Security', 'SSD 500 GB'],
+                processor: 'Quad Core 1.6 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '5QK13A', 
+                model: 'HP Color LaserJet Managed MFP E78525dn', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 25,
+                publicPrice: 11999, 
+                resellerPrice: 3840, 
+                discount: 68,
+                resolution: '1200 x 1200 dpi',
+                memory: '6 GB',
+                paperCapacity: '1140 feuilles (std) / 6140 feuilles (max)',
+                monthlyVolume: '200 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC', '5G (option)'],
+                features: ['Recto-verso auto', 'ADF 200 feuilles', 'Écran tactile 10.1"', 'EFI Fiery Controller', 'Pantone certifié', 'SSD 500 GB', 'Finition booklet'],
+                processor: 'Quad Core 1.6 GHz + EFI Fiery'
+            },
+            {
+                brand: 'HP', 
+                ref: '5QJ90A', 
+                model: 'HP Color LaserJet Managed MFP E786dn', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 30,
+                publicPrice: 7424, 
+                resellerPrice: 2219, 
+                discount: 70,
+                resolution: '1200 x 1200 dpi',
+                memory: '4 GB',
+                paperCapacity: '650 feuilles (std) / 4000 feuilles (max)',
+                monthlyVolume: '175 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax (option)'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi (option)'],
+                features: ['Recto-verso auto', 'ADF 100 feuilles', 'Écran tactile 8"', 'HP JetIntelligence', 'Couleur professionnelle', 'HDD 320 GB'],
+                processor: 'Dual Core 1.4 GHz'
+            },
+            {
+                brand: 'HP', 
+                ref: '5QJ94A', 
+                model: 'HP Color LaserJet Managed Flow MFP E786z', 
+                format: 'A3', 
+                type: 'COLOR',
+                speed: 30,
+                publicPrice: 9394, 
+                resellerPrice: 3194, 
+                discount: 66,
+                resolution: '1200 x 1200 dpi',
+                memory: '6 GB',
+                paperCapacity: '650 feuilles (std) / 4000 feuilles (max)',
+                monthlyVolume: '175 000 pages/mois',
+                functions: ['Impression', 'Copie', 'Scan', 'Fax'],
+                connectivity: ['USB 3.0', 'Ethernet Gigabit', 'WiFi', 'NFC'],
+                features: ['Recto-verso auto', 'ADF Flow 200 feuilles', 'Écran tactile 10.1"', 'Clavier extractible', 'OCR avancé', 'SSD 500 GB', 'Finition pro'],
+                processor: 'Quad Core 1.6 GHz'
+            }
+        ];
+        
+        // Variables globales
+        let filteredProducts = [...products];
+        let currentView = 'table';
+        
+        // Fonction de filtrage améliorée
+        function filterProducts() {
+            const brand = document.getElementById('brandFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+            const speed = document.getElementById('speedFilter').value;
+            const search = document.getElementById('searchFilter').value.toLowerCase();
+            
+            filteredProducts = products.filter(product => {
+                let match = true;
+                
+                if (brand && product.brand !== brand) match = false;
+                
+                if (category) {
+                    if (category === 'A4' && product.format !== 'A4') match = false;
+                    if (category === 'A3' && product.format !== 'A3') match = false;
+                    if (category === 'NB' && product.type !== 'NB') match = false;
+                    if (category === 'COLOR' && product.type !== 'COLOR') match = false;
+                }
+                
+                if (speed) {
+                    const productSpeed = product.speed;
+                    if (speed === '20-30' && (productSpeed < 20 || productSpeed > 30)) match = false;
+                    if (speed === '31-40' && (productSpeed < 31 || productSpeed > 40)) match = false;
+                    if (speed === '41-50' && (productSpeed < 41 || productSpeed > 50)) match = false;
+                    if (speed === '51+' && productSpeed <= 50) match = false;
+                }
+                
+                if (search) {
+                    const searchIn = `${product.ref} ${product.model} ${product.features.join(' ')} ${product.connectivity.join(' ')}`.toLowerCase();
+                    if (!searchIn.includes(search)) match = false;
+                }
+                
+                return match;
+            });
+            
+            if (currentView === 'table') {
+                renderTable();
+            } else {
+                renderCards();
+            }
+            updateStats();
+        }
+        
+        // Fonction de rendu du tableau détaillé
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredProducts.length === 0) {
+                tbody.innerHTML = '';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            tbody.innerHTML = filteredProducts.map(product => `
+                <tr>
+                    <td><span class="brand-badge brand-${product.brand.toLowerCase()}">${product.brand}</span></td>
+                    <td><strong>${product.ref}</strong></td>
+                    <td>
+                        <strong>${product.model}</strong>
+                        <div class="features">
+                            <span class="category-badge cat-${product.format.toLowerCase()}">${product.format}</span>
+                            <span class="category-badge cat-${product.type.toLowerCase()}">${product.type === 'NB' ? 'N&B' : 'Couleur'}</span>
+                            <span class="feature-tag highlight">${product.speed} ppm</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="spec-list">
+                            <div class="spec-item">
+                                <span class="spec-label">Résolution:</span>
+                                <span class="spec-value">${product.resolution}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Mémoire:</span>
+                                <span class="spec-value">${product.memory}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Capacité:</span>
+                                <span class="spec-value">${product.paperCapacity}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Volume:</span>
+                                <span class="spec-value">${product.monthlyVolume}</span>
+                            </div>
+                            ${product.processor ? `
+                            <div class="spec-item">
+                                <span class="spec-label">Processeur:</span>
+                                <span class="spec-value">${product.processor}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="features">
+                            ${product.functions.map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                        </div>
+                        <div class="features" style="margin-top: 5px;">
+                            ${product.features.slice(0, 5).map(f => `<span class="feature-tag highlight">${f}</span>`).join('')}
+                            ${product.features.length > 5 ? `<span class="feature-tag">+${product.features.length - 5} autres</span>` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="features">
+                            ${product.connectivity.map(c => `<span class="feature-tag">${c}</span>`).join('')}
+                        </div>
+                    </td>
+                    <td class="price">${product.publicPrice.toLocaleString('fr-FR')} €</td>
+                    <td class="price">${product.resellerPrice.toLocaleString('fr-FR')} €</td>
+                    <td><span class="discount">-${product.discount}%</span></td>
+                </tr>
+            `).join('');
+        }
+        
+        // Fonction de rendu des cartes
+        function renderCards() {
+            const container = document.getElementById('cardsView');
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = '<div class="no-results">Aucun produit ne correspond à vos critères de recherche.</div>';
+                return;
+            }
+            
+            container.innerHTML = filteredProducts.map(product => `
+                <div class="product-card">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <span class="brand-badge brand-${product.brand.toLowerCase()}">${product.brand}</span>
+                            <h3>${product.ref}</h3>
+                            <div class="model">${product.model}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span class="category-badge cat-${product.format.toLowerCase()}">${product.format}</span>
+                            <span class="category-badge cat-${product.type.toLowerCase()}">${product.type === 'NB' ? 'N&B' : 'Couleur'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="specs">
+                        <div class="spec-list">
+                            <div class="spec-item">
+                                <span class="spec-label">Vitesse:</span>
+                                <span class="spec-value"><strong>${product.speed} ppm</strong></span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Résolution:</span>
+                                <span class="spec-value">${product.resolution}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Mémoire:</span>
+                                <span class="spec-value">${product.memory}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Capacité papier:</span>
+                                <span class="spec-value">${product.paperCapacity}</span>
+                            </div>
+                            <div class="spec-item">
+                                <span class="spec-label">Volume mensuel:</span>
+                                <span class="spec-value">${product.monthlyVolume}</span>
+                            </div>
+                            ${product.processor ? `
+                            <div class="spec-item">
+                                <span class="spec-label">Processeur:</span>
+                                <span class="spec-value">${product.processor}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <strong>Fonctions:</strong>
+                            <div class="features">
+                                ${product.functions.map(f => `<span class="feature-tag">${f}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <strong>Connectivité:</strong>
+                            <div class="features">
+                                ${product.connectivity.map(c => `<span class="feature-tag">${c}</span>`).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 10px;">
+                            <strong>Points forts:</strong>
+                            <div class="features">
+                                ${product.features.map(f => `<span class="feature-tag highlight">${f}</span>`).join('')}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="pricing">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                            <span>Prix public:</span>
+                            <span style="text-decoration: line-through; color: #6c757d;">
+                                ${product.publicPrice.toLocaleString('fr-FR')} €
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Prix revendeur:</span>
+                            <span class="price" style="font-size: 1.3em;">
+                                ${product.resellerPrice.toLocaleString('fr-FR')} €
+                            </span>
+                        </div>
+                        <div style="text-align: center; margin-top: 10px;">
+                            <span class="discount" style="font-size: 1.1em;">Remise ${product.discount}%</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Fonction de changement de vue
+        function switchView(view) {
+            currentView = view;
+            const tableView = document.getElementById('tableView');
+            const cardsView = document.getElementById('cardsView');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (view === 'table') {
+                tableView.style.display = 'block';
+                cardsView.style.display = 'none';
+                renderTable();
+            } else {
+                tableView.style.display = 'none';
+                cardsView.style.display = 'grid';
+                renderCards();
+            }
+        }
+        
+        // Fonction de mise à jour des statistiques
+        function updateStats() {
+            document.getElementById('totalProducts').textContent = filteredProducts.length;
+            
+            if (filteredProducts.length > 0) {
+                const avgDiscount = Math.round(
+                    filteredProducts.reduce((sum, p) => sum + p.discount, 0) / filteredProducts.length
+                );
+                document.getElementById('avgDiscount').textContent = avgDiscount + '%';
+                
+                const avgSpeed = Math.round(
+                    filteredProducts.reduce((sum, p) => sum + p.speed, 0) / filteredProducts.length
+                );
+                document.getElementById('avgSpeed').textContent = avgSpeed + ' ppm';
+                
+                const prices = filteredProducts.map(p => p.resellerPrice);
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                document.getElementById('priceRange').textContent = 
+                    `${minPrice.toLocaleString('fr-FR')}€ - ${maxPrice.toLocaleString('fr-FR')}€`;
+            } else {
+                document.getElementById('avgDiscount').textContent = '0%';
+                document.getElementById('avgSpeed').textContent = '0';
+                document.getElementById('priceRange').textContent = '-';
+            }
+        }
+        
+        // Fonction d'export CSV améliorée
+        function exportToCSV() {
+            const headers = [
+                'Marque', 'Référence', 'Modèle', 'Format', 'Type', 
+                'Vitesse (ppm)', 'Résolution', 'Mémoire', 'Capacité papier',
+                'Volume mensuel', 'Fonctions', 'Connectivité', 'Points forts',
+                'Prix Public', 'Prix Revendeur', 'Remise (%)'
+            ];
+            
+            const rows = filteredProducts.map(p => [
+                p.brand,
+                p.ref,
+                p.model,
+                p.format,
+                p.type === 'NB' ? 'Noir & Blanc' : 'Couleur',
+                p.speed,
+                p.resolution,
+                p.memory,
+                p.paperCapacity,
+                p.monthlyVolume,
+                p.functions.join(' / '),
+                p.connectivity.join(' / '),
+                p.features.join(' / '),
+                p.publicPrice,
+                p.resellerPrice,
+                p.discount
+            ]);
+            
+            let csv = headers.join(';') + '\n';
+            rows.forEach(row => {
+                csv += row.join(';') + '\n';
+            });
+            
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'comparatif_detaille_tarifs_' + new Date().toISOString().split('T')[0] + '.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Event listeners
+        document.getElementById('brandFilter').addEventListener('change', filterProducts);
+        document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+        document.getElementById('speedFilter').addEventListener('change', filterProducts);
+        document.getElementById('searchFilter').addEventListener('input', filterProducts);
+        
+        // Initialisation
+        renderTable();
+        updateStats();
+    </script>
+</body>
+</html>
